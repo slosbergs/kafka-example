@@ -1,10 +1,9 @@
 ﻿using AvroBlogExample;
-using AvroBlogExamples.EventBus;
+using EventBus.Sdk;
+using EventBus.Sdk.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Threading.Tasks;
 
 var host = Host.CreateDefaultBuilder(args)
     //.ConfigureAppConfiguration((context, config) =>

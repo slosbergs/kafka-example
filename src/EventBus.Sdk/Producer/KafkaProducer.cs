@@ -3,12 +3,10 @@ using CloudNative.CloudEvents.Extensions;
 using CloudNative.CloudEvents.Kafka;
 using CloudNative.CloudEvents.SystemTextJson;
 using Confluent.Kafka;
+using EventBus.Sdk.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Text.Json;
-using System.Threading.Tasks;
-
-namespace AvroBlogExamples.EventBus;
+namespace EventBus.Sdk.Producer;
 
 public interface IEventProducer
 {
@@ -27,12 +25,12 @@ public class KafkaProducer : IEventProducer, IDisposable
 
     public KafkaProducer(ILogger<KafkaProducer> logger, EventBusConfig config)
     {
-        this._logger = logger;
+        _logger = logger;
         _config = config.KafkaProducer;
         _config.BootstrapServers = config.BootstrapServers;
         _config.SecurityProtocol = config.Security?.SecurityProtocol ?? SecurityProtocol.Plaintext;
         _config.SaslMechanism = config.Security?.SaslMechanism;
-        
+
         _producer = new ProducerBuilder<string, byte[]>(_config)
             .SetLogHandler(LogHandler)
             .Build();

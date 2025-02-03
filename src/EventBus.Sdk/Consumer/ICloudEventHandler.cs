@@ -1,7 +1,7 @@
 ﻿using CloudNative.CloudEvents;
 using System.Threading.Tasks;
 
-namespace AvroBlogExamples.EventBus;
+namespace EventBus.Sdk.Consumer;
 
 public interface ICloudEventHandler
 {

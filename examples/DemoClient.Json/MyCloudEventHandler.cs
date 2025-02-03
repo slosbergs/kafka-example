@@ -1,5 +1,5 @@
-﻿using AvroBlogExamples.EventBus;
-using CloudNative.CloudEvents;
+﻿using CloudNative.CloudEvents;
+using EventBus.Sdk.Consumer;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 

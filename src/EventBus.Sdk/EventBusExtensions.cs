@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using EventBus.Sdk.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace AvroBlogExamples.EventBus;
+namespace EventBus.Sdk;
 
-public static class EventBusExtensions
+public static class IServiceCollectionExtensions
 {
     public static IServiceCollection AddEventBus(this IServiceCollection services, EventBusConfig evbConfig, Action<IEventBusBuilder> configure)
     {

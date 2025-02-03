@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 
+namespace EventBus.Sdk.Configuration;
 public class EventBusConfig
 {
     public SecurityConfig Security { get; set; }
@@ -10,10 +11,12 @@ public class EventBusConfig
 
 public class EvbConsumerConfig : ConsumerConfig
 {
-    public string Topics { get; set; }
+    public string? Topics { get; set; }
 
-    public new AutoOffsetReset AutoOffsetReset { get; set; } = AutoOffsetReset.Latest;
-    public new int QueuedMinMessages { get; set; } = 10;
+    public new AutoOffsetReset AutoOffsetReset { get; set; } = AutoOffsetReset.Earliest;
+    public new int? QueuedMinMessages { get; set; } = 10;
+
+    public new int? SessionTimeoutMs = (int)TimeSpan.FromMinutes(3).TotalMilliseconds;
 
     public new bool EnableAutoCommit { get; } = false;
 }
@@ -34,6 +37,8 @@ public class EvbProducerConfig : ProducerConfig
     public new bool EnableIdempotence { get; set; } = true;
     public new double LingerMs { get; set; } = 0;
     public new int? MessageSendMaxRetries { get; set; } = 5;
+
+    public new string DeliveryReportFields { get; set; } = "status";
 }
 
 

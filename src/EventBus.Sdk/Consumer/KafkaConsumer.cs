@@ -1,17 +1,13 @@
 ﻿using CloudNative.CloudEvents.Kafka;
 using CloudNative.CloudEvents.SystemTextJson;
 using Confluent.Kafka;
+using EventBus.Sdk.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
 using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace AvroBlogExamples.EventBus;
+namespace EventBus.Sdk.Consumer;
 public class KafkaConsumer : BackgroundService
 {
     private readonly ConsumerConfig _config;
@@ -27,9 +23,9 @@ public class KafkaConsumer : BackgroundService
         _logger = logger;
         _config = eventBusConfig.KafkaConsumer;
         _config.GroupId ??= "consumer__" + Guid.NewGuid().ToString();
+        _config.GroupInstanceId ??= Guid.NewGuid().ToString();
         _config.BootstrapServers = eventBusConfig.BootstrapServers;
-        _config.MaxInFlight = 5;
-        
+
         _consumer = new ConsumerBuilder<string, byte[]>(_config)
             .SetLogHandler(LogHandler)
             .Build();
@@ -81,7 +77,7 @@ public class KafkaConsumer : BackgroundService
                 _consumer.Commit();
             }
             catch (Exception ex)
-            {                
+            {
                 var headerList = headers.Select(h => $"{h.Key}:{Convert.ToString(h.GetValueBytes())}").ToArray();
                 headers = null;
                 _logger.LogError(ex, $"Error processing Kafka message. {@headers}", headerList);

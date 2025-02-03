@@ -1,8 +1,7 @@
-﻿using AvroBlogExamples.EventBus;
-using CloudNative.CloudEvents;
+﻿using CloudNative.CloudEvents;
+using EventBus.Sdk.Producer;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace AvroBlogExample;
@@ -22,7 +21,8 @@ public class Demo(ILogger<Demo> logger, IEventProducer eventProducer)
         };
 
         var deliveryReport = await eventProducer.ProduceAsync(msg);
-        logger.LogInformation("Producerd event, {@deliveryReport}", deliveryReport);
+        logger.LogInformation("Producerd event: topic {0}, partition {1}, offset {2}", 
+            deliveryReport.Topic, deliveryReport.Partition, deliveryReport.Offset);
     }
 }
 

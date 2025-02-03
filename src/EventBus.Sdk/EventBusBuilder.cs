@@ -1,8 +1,9 @@
-﻿using Confluent.Kafka;
+﻿using EventBus.Sdk.Configuration;
+using EventBus.Sdk.Consumer;
+using EventBus.Sdk.Producer;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
-namespace AvroBlogExamples.EventBus;
+namespace EventBus.Sdk;
 
 public interface IEventBusBuilder
 {

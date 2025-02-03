@@ -1,11 +1,11 @@
 ﻿using Confluent.Kafka;
 using System;
 
-namespace AvroBlogExamples.EventBus;
+namespace EventBus.Sdk.Producer;
 
 public record DeliveryReport
 {
-    public string Topic { get; private set; }
+    public string? Topic { get; private set; }
     public int Partition { get; private set; }
     public long Offset { get; private set; }
 
