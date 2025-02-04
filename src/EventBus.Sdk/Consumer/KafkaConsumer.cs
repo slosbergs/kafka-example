@@ -1,4 +1,5 @@
-﻿using CloudNative.CloudEvents.Kafka;
+﻿using Avro;
+using CloudNative.CloudEvents.Kafka;
 using CloudNative.CloudEvents.SystemTextJson;
 using Confluent.Kafka;
 using EventBus.Sdk.Configuration;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace EventBus.Sdk.Consumer;
 public class KafkaConsumer : BackgroundService
@@ -26,15 +28,24 @@ public class KafkaConsumer : BackgroundService
         _config.GroupInstanceId ??= Guid.NewGuid().ToString();
         _config.BootstrapServers = eventBusConfig.BootstrapServers;
 
+        // FIXME add OAuth authentication
+
         _consumer = new ConsumerBuilder<string, byte[]>(_config)
-            .SetLogHandler(LogHandler)
+            .SetLogHandler(OnLog)
+            .SetErrorHandler(OnError)
             .Build();
 
-        var topics = eventBusConfig.KafkaConsumer.Topics; // FIXME "^" + Regex.Escape(eventBusConfig.KafkaConsumer.Topics).Replace("\\*", ".*") + "$";
+        var topics = eventBusConfig.KafkaConsumer.Topics!.Split([',', ' ', ';'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(t => "^" + Regex.Escape(t).Replace("\\*", ".*") + "$");
         _consumer.Subscribe(topics);
     }
 
-    private void LogHandler(IConsumer<string, byte[]> producer, LogMessage message)
+    private void OnError(IConsumer<string, byte[]> consumer, Error error)
+    {
+        _logger.LogError("IsLocalError: {IsLocalError}, Error: {Code}, {Reason}", error.IsLocalError, error.Code, error.Reason);
+    }
+
+    private void OnLog(IConsumer<string, byte[]> producer, LogMessage message)
     {
         if (message.Level < SyslogLevel.Error)
             _logger.LogCritical(message.Message);

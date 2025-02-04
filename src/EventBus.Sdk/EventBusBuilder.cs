@@ -9,6 +9,7 @@ public interface IEventBusBuilder
 {
     IEventBusBuilder WithKafkaProducer();
     IEventBusBuilder WithKafkaConsumer<THandler>() where THandler : class, ICloudEventHandler;
+    IEventBusBuilder WithDelayedKafkaConsumer<THandler>() where THandler : class, ICloudEventHandler;
     void Build(IServiceCollection services);
 }
 
@@ -54,5 +55,12 @@ public class EventBusBuilder : IEventBusBuilder
 
         // Register Kafka Consumer as a Background Service
         services.AddHostedService<KafkaConsumer>();
+    }
+
+    IEventBusBuilder IEventBusBuilder.WithDelayedKafkaConsumer<THandler>()
+    {
+        // TODO add client that will delay the message processing by X number of minutes
+        // this is to be used for retry queue processing.
+        throw new NotImplementedException();
     }
 }

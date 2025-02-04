@@ -13,6 +13,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBus.Sdk", "src\EventBu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoClient.Json", "examples\DemoClient.Json\DemoClient.Json.csproj", "{B5C1F124-0501-4AE9-B2D6-C65DC523BF97}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireClient", "examples\AspireClient\AspireClient.csproj", "{DFD2F6DB-4A9F-4C61-9E52-F93E66002D85}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{80FB53F8-819F-4C5A-85FC-888594DD0C8F}"
+	ProjectSection(SolutionItems) = preProject
+		examples\docker\docker-compose.yml = examples\docker\docker-compose.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +34,10 @@ Global
 		{B5C1F124-0501-4AE9-B2D6-C65DC523BF97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5C1F124-0501-4AE9-B2D6-C65DC523BF97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5C1F124-0501-4AE9-B2D6-C65DC523BF97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFD2F6DB-4A9F-4C61-9E52-F93E66002D85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFD2F6DB-4A9F-4C61-9E52-F93E66002D85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFD2F6DB-4A9F-4C61-9E52-F93E66002D85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFD2F6DB-4A9F-4C61-9E52-F93E66002D85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -34,5 +45,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{588F3B4C-415D-44F6-97A6-3EA7F80B3342} = {48A8A2E1-58B4-4AEF-A143-7E85492BE273}
 		{B5C1F124-0501-4AE9-B2D6-C65DC523BF97} = {A76F0D3B-6A70-4F11-889C-1C73048BD097}
+		{DFD2F6DB-4A9F-4C61-9E52-F93E66002D85} = {A76F0D3B-6A70-4F11-889C-1C73048BD097}
+		{80FB53F8-819F-4C5A-85FC-888594DD0C8F} = {A76F0D3B-6A70-4F11-889C-1C73048BD097}
 	EndGlobalSection
 EndGlobal

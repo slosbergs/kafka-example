@@ -1,15 +1,12 @@
-﻿using AvroBlogExample;
+﻿using DemoClient.Json;
 using EventBus.Sdk;
 using EventBus.Sdk.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 
 var host = Host.CreateDefaultBuilder(args)
-    //.ConfigureAppConfiguration((context, config) =>
-    //{
-    //    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-    //})
     .ConfigureServices((context, services) =>
     {
 
@@ -30,6 +27,8 @@ var host = Host.CreateDefaultBuilder(args)
 var t = host.RunAsync();
 
 var my = host.Services.GetRequiredService<Demo>();
-await my.Publish();
+
+var foo = new FooClass() { Name = "Frank Drebin", FavoriteColor = "RED" };
+await my.Publish(foo);
 
 await t;
