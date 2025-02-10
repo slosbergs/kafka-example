@@ -22,7 +22,7 @@ public class Demo(ILogger<Demo> logger, IEventProducer eventProducer)
         };
 
         var deliveryReport = await eventProducer.ProduceAsync(msg);
-        logger.LogInformation("Produced event: id {-1}, topic {0}, partition {1}, offset {2}",
+        logger.LogInformation("Produced event: id {0}, topic {1}, partition {2}, offset {3}",
             msg.Id, deliveryReport.Topic, deliveryReport.Partition, deliveryReport.Offset);
     }
 }

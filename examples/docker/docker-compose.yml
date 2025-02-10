@@ -11,12 +11,12 @@ services:
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_LISTENERS: 
         PLAINTEXT://192.168.101.3:9092,
-        BROKER://localhost:29092,
+        BROKER://broker:29092,
         CONTROLLER://localhost:9093
 
       KAFKA_ADVERTISED_LISTENERS: 
         PLAINTEXT://192.168.101.3:9092,
-        BROKER://localhost:29092,
+        BROKER://broker:29092,
         CONTROLLER://localhost:9093
 
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 
@@ -44,7 +44,7 @@ services:
     depends_on:
       - broker
     environment:
-      SCHEMA_REGISTRY_KAFKA_BROKERS: PLAINTEXT://localhost:29092
+      SCHEMA_REGISTRY_KAFKA_BROKERS: PLAINTEXT://broker:29092
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       
       
