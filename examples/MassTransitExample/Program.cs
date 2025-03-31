@@ -1,19 +1,29 @@
 using Confluent.Kafka;
+using Confluent.Kafka.SyncOverAsync;
+using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
 using MassTransit;
-using MassTransit.KafkaIntegration;
-using MassTransit.KafkaIntegration.Caching;
 using MassTransitExample;
+using MassTransitExample.SerDes;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+string Topic = "demo-topic";
+string GroupId = "demo-consumer";
 
 var kafkaConsumerConfig = new ConsumerConfig()
 {
     Acks = Acks.All,
-    GroupId = "demo-consumer",
+    GroupId = GroupId,
     AutoOffsetReset = AutoOffsetReset.Earliest
 };
+
+builder.Services.AddSingleton<ISchemaRegistryClient>(
+    new CachedSchemaRegistryClient(new Dictionary<string, string>
+    {
+        {"schema.registry.url", "192.168.101.3:8081"},
+    }));
+
 
 
 builder.Services.AddMassTransit(mt =>
@@ -22,14 +32,13 @@ builder.Services.AddMassTransit(mt =>
 
         mt.AddRider(rider =>
         {
-            rider.AddProducer<KafkaJsonMessage>("demo-topic", (context, cfg) =>
+            rider.AddProducer<string, CloudEventDto>(Topic, (context, cfg) =>
             {
-                //cfg.SetValueSerializer(new CloudEventSerializer());
                 // Configure the AVRO serializer, with the schema registry client
-                //cfg.SetValueSerializer(new AvroSerializer<KafkaJsonMessage>(context.GetRequiredService<ICachedTopicProducer>()));
-            });
+                cfg.SetValueSerializer(new AvroSerializer<CloudEventDto>(context.GetRequiredService<ISchemaRegistryClient>()).AsSyncOverAsync());
+        });
 
-            rider.AddConsumer<KafkaMessageConsumer>((context, cfg) =>
+            rider.AddConsumer<CloudEventDtoHandler>((context, cfg) =>
             {
                 // Configure the AVRO serializer, with the schema registry client
                 //cfg.SetValueSerializer(new AvroSerializer<KafkaJsonMessage>(context.GetRequiredService<ICachedTopicProducer>()));
@@ -51,15 +60,26 @@ builder.Services.AddMassTransit(mt =>
                     //});
                 });
 
-                k.TopicEndpoint<KafkaJsonMessage>("demo-topic", kafkaConsumerConfig, e =>
+                k.TopicEndpoint<string, CloudEventDto>(Topic, GroupId, e =>
                 {
-                    // ref https://masstransit.io/documentation/configuration/transports/kafka#scalability
-                    e.ConcurrentConsumerLimit = 100;
-                    e.ConcurrentMessageLimit = 100;
-                    e.MessageLimit = 100;
-                    e.PrefetchCount = 500;
+                    e.AutoOffsetReset = AutoOffsetReset.Earliest;
 
-                    e.ConfigureConsumer<KafkaMessageConsumer>(context);
+                    e.SetValueDeserializer(new AvroDeserializer<CloudEventDto>(context.GetRequiredService<ISchemaRegistryClient>()).AsSyncOverAsync());
+
+                    // the number of concurrent messages, per partition
+                    e.ConcurrentMessageLimit = 20;
+
+                    // create up to two Confluent Kafka consumers, increases throughput with multiple partitions
+                    e.ConcurrentConsumerLimit = 10;
+
+                    // delivery only one message per key value within a partition at a time (default)
+                    e.ConcurrentDeliveryLimit = 1;
+
+                    // Adding this filter allows AVRO union messages to be consumed directly
+                    // ref 
+                    //e.UseAvroUnionMessageTypeFilter<CloudEventDto>(m => m.Event);
+
+                    e.ConfigureConsumer<CloudEventDtoHandler>(context);
                 });
             });
         });
@@ -67,7 +87,7 @@ builder.Services.AddMassTransit(mt =>
 
 
 builder.Services.AddSingleton<Counter>();
-//builder.Services.AddHostedService<Worker>();
+builder.Services.AddHostedService<Worker>();
 var host = builder.Build();
 
 

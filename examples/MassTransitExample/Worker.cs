@@ -1,6 +1,6 @@
 using MassTransit;
-using MassTransit.KafkaIntegration;
-using Microsoft.Extensions.DependencyInjection;
+using MassTransitExample.SerDes;
+using System.Text.Json;
 
 namespace MassTransitExample
 {
@@ -19,11 +19,23 @@ namespace MassTransitExample
         {
             using (var scope = provider.CreateScope())
             {
-                var producer = scope.ServiceProvider.GetRequiredService<ITopicProducer<KafkaJsonMessage>>();
+                //var producer = scope.ServiceProvider.GetRequiredService<ITopicProducer<KafkaJsonMessage>>(); 
+                var producer = scope.ServiceProvider.GetRequiredService<ITopicProducer<string, CloudEventDto>>();
                 while (!stoppingToken.IsCancellationRequested)
                 {
+
+                    var payload = new KafkaJsonMessage() { Payload = DateTime.Now.Second };
+
+                    var msg = new CloudEventDto() { 
+                        CorrelationId = Guid.NewGuid().ToString(),
+                        Id = Guid.NewGuid().ToString(),
+                        Type = "deposits.notifications",
+                        Time = DateTime.UtcNow,
+                        Source = "demo",
+                        ClearTextData = JsonSerializer.Serialize(payload) };
+
                     //   _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                    await producer.Produce(new KafkaJsonMessage() { Payload = 111 }, stoppingToken);
+                    await producer.Produce("partitionkey", msg, stoppingToken);
 
                     await Task.Delay(5000, stoppingToken);
                 }

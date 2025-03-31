@@ -8,9 +8,9 @@ using System.Text.Json;
 
 namespace MassTransitExample.SerDes;
 
-public class MassTransitJsonDeserializer<T> : IDeserializer<CloudEvent>
+public class CloudEventDtoSerializer<T> : IDeserializer<CloudEventDto>
 {
-    public CloudEvent Deserialize(ReadOnlySpan<byte> data, bool isNull, SerializationContext context)
+    public CloudEventDto Deserialize(ReadOnlySpan<byte> data, bool isNull, SerializationContext context)
     {
         if (data.IsEmpty && isNull)
             return default;
