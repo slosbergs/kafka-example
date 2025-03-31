@@ -29,13 +29,15 @@ namespace MassTransitExample
                     var msg = new CloudEventDto() { 
                         CorrelationId = Guid.NewGuid().ToString(),
                         Id = Guid.NewGuid().ToString(),
-                        Type = "deposits.notifications",
+                        Type = "deposits.customer.profile.updated",
                         Time = DateTime.UtcNow,
                         Source = "demo",
                         ClearTextData = JsonSerializer.Serialize(payload) };
 
                     //   _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                     await producer.Produce("partitionkey", msg, stoppingToken);
+
+                    _logger.LogInformation("published...");
 
                     await Task.Delay(5000, stoppingToken);
                 }

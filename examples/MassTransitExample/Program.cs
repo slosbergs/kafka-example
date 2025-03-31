@@ -30,13 +30,16 @@ builder.Services.AddMassTransit(mt =>
     {
         mt.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
 
+
         mt.AddRider(rider =>
         {
             rider.AddProducer<string, CloudEventDto>(Topic, (context, cfg) =>
             {
+                cfg.EnableDeliveryReports = true;
+                cfg.EnableIdempotence = true;
                 // Configure the AVRO serializer, with the schema registry client
                 cfg.SetValueSerializer(new AvroSerializer<CloudEventDto>(context.GetRequiredService<ISchemaRegistryClient>()).AsSyncOverAsync());
-        });
+            });
 
             rider.AddConsumer<CloudEventDtoHandler>((context, cfg) =>
             {

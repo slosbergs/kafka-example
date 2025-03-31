@@ -4,6 +4,7 @@
 using Avro;
 using Avro.Specific;
 using System;
+using System.Text.Json.Serialization;
 
 namespace MassTransitExample.SerDes;
 
@@ -29,6 +30,7 @@ public class CloudEventDto : ISpecificRecord
     ]
 }");
 
+    [JsonIgnore]
     public Schema Schema => _SCHEMA;
 
     public string Specversion { get; } = "1.0";
@@ -60,6 +62,7 @@ public class CloudEventDto : ISpecificRecord
     {
         switch (fieldPos)
         {
+            case 0: break;
             case 1: Type = (string)value; break;
             case 2: Source = (string)value; break;
             case 3: Id = (string)value; break;
