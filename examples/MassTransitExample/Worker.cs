@@ -1,3 +1,4 @@
+using CloudNative.CloudEvents;
 using MassTransit;
 using MassTransitExample.SerDes;
 using System.Text.Json;
@@ -26,13 +27,15 @@ namespace MassTransitExample
 
                     var payload = new KafkaJsonMessage() { Payload = DateTime.Now.Second };
 
-                    var msg = new CloudEventDto() { 
-                        CorrelationId = Guid.NewGuid().ToString(),
+                    var msg = new CloudEvent()
+                    {
                         Id = Guid.NewGuid().ToString(),
                         Type = "deposits.customer.profile.updated",
                         Time = DateTime.UtcNow,
-                        Source = "demo",
-                        ClearTextData = JsonSerializer.Serialize(payload) };
+                        Source = new Uri("demo", UriKind.Relative),
+                        Data = JsonSerializer.Serialize(payload)
+                    };
+                    msg["correlationid"] = Guid.NewGuid().ToString();
 
                     //   _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                     await producer.Produce("partitionkey", msg, stoppingToken);

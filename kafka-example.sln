@@ -16,6 +16,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{80FB53F8-819F-4C5A-85FC-888594DD0C8F}"
 	ProjectSection(SolutionItems) = preProject
 		examples\docker\docker-compose.yml = examples\docker\docker-compose.yml
+		schema-registry.http = schema-registry.http
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaFlow-demo", "examples\KafkaFlow-demo\KafkaFlow-demo.csproj", "{F9FA27AF-D00E-4F07-9C47-3269DE35AA8F}"

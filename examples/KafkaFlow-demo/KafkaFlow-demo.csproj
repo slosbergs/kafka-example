@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Events\sample.avsc" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="KafkaFlow" Version="3.0.10" />
     <PackageReference Include="CloudNative.CloudEvents" Version="2.8.0" />
     <PackageReference Include="CloudNative.CloudEvents.SystemTextJson" Version="2.8.0" />

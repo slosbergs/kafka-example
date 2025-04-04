@@ -1,6 +1,5 @@
 ﻿// ref https://github.com/MassTransit/MassTransit/blob/5dffe5664b81e6738f5d9411cca7ba178bb0ca9e/src/Transports/MassTransit.KafkaIntegration/KafkaIntegration/Serializers/MassTransitJsonDeserializer.cs
 
-
 using Avro;
 using Avro.Specific;
 using System;
@@ -26,7 +25,7 @@ public class CloudEventDto : ISpecificRecord
         { ""name"": ""Time"", ""type"": [""null"", ""string""], ""default"": null },
         { ""name"": ""CorrelationId"", ""type"": [""null"", ""string""], ""default"": null },
         { ""name"": ""DataContentType"", ""type"": [""null"", ""string""], ""default"": ""application/json"" },
-        { ""name"": ""ClearTextData"", ""type"": [""null"", ""string""], ""default"": null }
+        { ""name"": ""Data"", ""type"": [""null"", ""string""], ""default"": null }
     ]
 }");
 
@@ -40,7 +39,7 @@ public class CloudEventDto : ISpecificRecord
     public required DateTime Time { get; set; }
     public required string CorrelationId { get; set; }
     public string DataContentType { get; set; } = "application/json";
-    public required string ClearTextData { get; set; }
+    public required string SerializedJsonData { get; set; }
 
     public object Get(int fieldPos)
     {
@@ -53,7 +52,7 @@ public class CloudEventDto : ISpecificRecord
             4 => Time.ToString("o"), // ISO 8601 format
             5 => CorrelationId,
             6 => DataContentType,
-            7 => ClearTextData,
+            7 => SerializedJsonData,
             _ => throw new AvroRuntimeException($"Invalid field index: {fieldPos}")
         };
     }
@@ -69,7 +68,7 @@ public class CloudEventDto : ISpecificRecord
             case 4: Time = DateTime.Parse((string)value); break;
             case 5: CorrelationId = (string)value; break;
             case 6: DataContentType = (string)value; break;
-            case 7: ClearTextData = (string)value; break;
+            case 7: SerializedJsonData = (string)value; break;
             default: throw new AvroRuntimeException($"Invalid field index: {fieldPos}");
         }
     }

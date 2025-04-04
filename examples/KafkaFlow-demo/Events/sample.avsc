@@ -1,0 +1,61 @@
+﻿{
+    "namespace": "io.cloudevents",
+  "type": "record",
+  "name": "CustomerProfileUpdatedEvent",
+  "fields": [
+    { "name": "customerId", "type": "string" },
+    {
+        "name": "profileType",
+      "type": {
+            "type": "enum",
+        "name": "ProfileType",
+        "symbols": ["Retail", "Commercial"]
+      }
+    },
+    {
+        "name": "profile",
+      "type": [
+        {
+            "type": "record",
+          "name": "RetailCustomerProfileDelta",
+          "fields": [
+            { "name": "firstName", "type": ["null", "string"], "default": null },
+            { "name": "middleName", "type": ["null", "string"], "default": null },
+            { "name": "lastName", "type": ["null", "string"], "default": null },
+            { "name": "nameSuffix", "type": ["null", "string"], "default": null },
+            {
+                "name": "address",
+              "type": ["null", {
+                    "type": "record",
+                "name": "AddressModel",
+                "fields": [
+                  { "name": "streetLine1", "type": ["null", "string"], "default": null },
+                  { "name": "streetLine2", "type": ["null", "string"], "default": null },
+                  { "name": "streetLine3", "type": ["null", "string"], "default": null },
+                  { "name": "city", "type": ["null", "string"], "default": null },
+                  { "name": "zip", "type": ["null", "string"], "default": null },
+                  { "name": "state", "type": ["null", "string"], "default": null },
+                  { "name": "zipPlusFour", "type": ["null", "string"], "default": null }
+                ]
+              }],
+              "default": null
+            }
+          ]
+        },
+        {
+            "type": "record",
+          "name": "CommercialCustomerProfileDelta",
+          "fields": [
+            { "name": "customerName", "type": ["null", "string"], "default": null },
+            { "name": "customerNameAdditional", "type": ["null", "string"], "default": null },
+            {
+                "name": "address",
+              "type": ["null", "AddressModel"],
+              "default": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

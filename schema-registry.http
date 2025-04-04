@@ -1,0 +1,23 @@
+@host = http://192.168.101.3:8081
+
+
+###
+GET http://192.168.101.3:8081/subjects/demo-topic-value/versions/latest
+
+###
+curl -X POST http://<SCHEMA_REGISTRY_URL>/subjects/CustomerProfileUpdated-value/versions \
+     -H "Content-Type: application/vnd.schemaregistry.v1+json" \
+     --data '{
+       "schema": "{\"type\":\"record\",\"name\":\"CustomerProfileUpdated\",\"fields\":[
+         { \"name\": \"profileType\", \"type\": { \"type\": \"enum\", \"name\": \"ProfileType\", \"symbols\": [\"R\", \"C\"] } },
+         { \"name\": \"profile\", \"type\": [
+           {\"type\":\"record\", \"name\":\"RetailCustomerProfileUpdated\", \"fields\":[
+             { \"name\": \"firstName\", \"type\": \"string\" },
+             { \"name\": \"lastName\", \"type\": \"string\" }
+           ]},
+           {\"type\":\"record\", \"name\":\"CommercialCustomerProfileUpdated\", \"fields\":[
+             { \"name\": \"entityName\", \"type\": \"string\" }
+           ]}
+         ]}
+       ]}"
+     }'

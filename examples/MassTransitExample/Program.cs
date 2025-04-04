@@ -1,3 +1,4 @@
+using CloudNative.CloudEvents;
 using Confluent.Kafka;
 using Confluent.Kafka.SyncOverAsync;
 using Confluent.SchemaRegistry;
@@ -40,6 +41,17 @@ builder.Services.AddMassTransit(mt =>
                 // Configure the AVRO serializer, with the schema registry client
                 cfg.SetValueSerializer(new AvroSerializer<CloudEventDto>(context.GetRequiredService<ISchemaRegistryClient>()).AsSyncOverAsync());
             });
+
+
+            //rider.AddProducer<string, CloudEvent>("demo-topic", (context, cfg) =>
+            //{
+            //    cfg.EnableDeliveryReports = true;
+            //    cfg.EnableIdempotence = true;
+            //    // Configure the AVRO serializer, with the schema registry client
+            //    cfg.SetValueSerializer(new CloudEventAvroSerializer(context.GetRequiredService<ISchemaRegistryClient>()).AsSyncOverAsync());
+            //});
+
+
 
             rider.AddConsumer<CloudEventDtoHandler>((context, cfg) =>
             {
@@ -84,6 +96,26 @@ builder.Services.AddMassTransit(mt =>
 
                     e.ConfigureConsumer<CloudEventDtoHandler>(context);
                 });
+
+                //k.UseSendFilter ConfigureProducers((provider, producerConfig) =>
+                //{
+                //    producerConfig.ConfigureProducerFactory((ctx, factoryConfig) =>
+                //    {
+                //        var logger = provider.GetRequiredService<ILoggerFactory>()
+                //            .CreateLogger("Kafka.Producer");
+
+                //        factoryConfig.SetDeliveryHandler(report =>
+                //        {
+                //            var level = report.Error.IsError ? LogLevel.Error : LogLevel.Debug;
+                //            logger.Log(level,
+                //                "Delivery report - Topic: {Topic}, Partition: {Partition}, Offset: {Offset}, Error: {Error}",
+                //                report.Topic,
+                //                report.Partition.Value,
+                //                report.Offset.Value,
+                //                report.Error.Reason);
+                //        });
+                //    });
+                //});
             });
         });
     });

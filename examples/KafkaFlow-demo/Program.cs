@@ -1,6 +1,7 @@
 ﻿using CloudNative.CloudEvents;
 using Confluent.Kafka;
 using KafkaFlow;
+using KafkaFlow_demo.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -10,6 +11,8 @@ await Host
     {
         Confluent.Kafka.ProducerConfig producerConfig = new Confluent.Kafka.ProducerConfig()
         {
+            MessageMaxBytes = 200000000,
+            //req = 200000000,
             Acks = Confluent.Kafka.Acks.All
         };
         var bootstrapHost = "192.168.101.3:9092";
@@ -17,14 +20,21 @@ await Host
 
         services.AddSingleton<MyCloudEventProducer>();
 
+        services.AddTransient<IMyProducer, MyProducer>();
+        services.AddHostedService<TestWorker>();
+
         services.AddKafkaFlowHostedService(kafka => kafka
             .AddCluster(cluster => cluster
                 .WithBrokers(new[] { bootstrapHost })
                 .WithSchemaRegistry(config => config.Url = schemaRegistryHost)
-                .AddProducer("cloudEventProducer",
+                .AddProducer<CloudEvent>(
                         producer =>
                             producer.WithProducerConfig(producerConfig)
-                        //.AddMiddlewares(m =>
+
+                        .AddMiddlewares(m => m
+                            .AddSchemaRegistryAvroSerializer()
+                            .Add<ProducerMiddleware>()
+                            )
                         //    m.AddSingleTypeSerializer<CloudEventSerializer>(typeof(CloudEvent))
                         //)
                         //.AddMiddlewares(middlewares =>
@@ -33,16 +43,16 @@ await Host
                         //            { SubjectNameStrategy = SubjectNameStrategy.TopicRecord })
                         //        )
                         )
-                .AddConsumer(consumer => consumer
-                    .Topic("topic-name")
-                    .WithGroupId("sample-group")
-                    .WithBufferSize(100)
-                    .WithWorkersCount(10)
-                    .AddMiddlewares(middlewares => middlewares
-                        .Add<ReconstructToCloudEvent>(MiddlewareLifetime.Singleton)
-                        .AddTypedHandlers(h => h.AddHandler<CloudEventHandler>())
-                    )
-                )
+            //.AddConsumer(consumer => consumer
+            //    .Topic("topic-name")
+            //    .WithGroupId("sample-group")
+            //    .WithBufferSize(100)
+            //    .WithWorkersCount(10)
+            //    .AddMiddlewares(middlewares => middlewares
+            //        .Add<ReconstructToCloudEvent>(MiddlewareLifetime.Singleton)
+            //        .AddTypedHandlers(h => h.AddHandler<CloudEventHandler>())
+            //    )
+            //)
             )
         );
     })

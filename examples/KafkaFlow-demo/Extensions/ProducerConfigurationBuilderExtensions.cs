@@ -4,6 +4,9 @@ using Confluent.SchemaRegistry.Serdes;
 using KafkaFlow;
 using KafkaFlow.Configuration;
 using KafkaFlow.Middlewares.Serializer;
+using KafkaFlow.Serializer.SchemaRegistry;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace KafkaFlow_demo.Extensions;
 
@@ -15,20 +18,24 @@ public static class ProducerConfigurationBuilderExtensions
     /// <param name="middlewares">The middleware configuration builder</param>
     /// <param name="config">The avro serializer configuration</param>
     /// <returns></returns>
-    public static IProducerMiddlewareConfigurationBuilder AddCloudEventSrAvroSerializer(
-        this IProducerMiddlewareConfigurationBuilder middlewares,
-        AvroSerializerConfig config = null)
-    {
-        return middlewares.Add(
-            resolver => new SerializerProducerMiddleware(
-                new CloudEventAvroSerializer(resolver, config),
-                new SchemaRegistryTypeResolver(new ConfluentAvroTypeNameResolver(resolver.Resolve<ISchemaRegistryClient>()))));
-    }
+    //public static IProducerMiddlewareConfigurationBuilder AddCloudEventSrAvroSerializer(
+    //    this IProducerMiddlewareConfigurationBuilder middlewares,
+    //    AvroSerializerConfig config = null)
+    //{
+    //    return middlewares.Add(
+    //        resolver => new SerializerProducerMiddleware(
+    //            new CloudEventAvroSerializer(resolver, config),
+    //            new SchemaRegistryTypeResolver(new MyAvroTypeNameResolver(resolver.Resolve<ISchemaRegistryClient>()))));
+    //}
 }
+
+
+
 
 public class CloudEventAvroSerializer : ISerializer
 {
     private readonly ISchemaRegistryClient _schemaRegistryClient;
+    private readonly ILogger<CloudEventAvroSerializer> logger;
     private readonly AvroSerializerConfig _serializerConfig;
 
     /// <summary>
@@ -37,6 +44,7 @@ public class CloudEventAvroSerializer : ISerializer
     /// <param name="resolver">The <see cref="IDependencyResolver"/> to be used by the framework</param>
     /// <param name="serializerConfig">Avro serializer configuration</param>
     public CloudEventAvroSerializer(
+        ILogger<CloudEventAvroSerializer> logger,
         IDependencyResolver resolver,
         AvroSerializerConfig serializerConfig = null)
     {
@@ -44,7 +52,7 @@ public class CloudEventAvroSerializer : ISerializer
             resolver.Resolve<ISchemaRegistryClient>() ??
             throw new InvalidOperationException(
                 $"No schema registry configuration was found. Set it using {nameof(ClusterConfigurationBuilderExtensions.WithSchemaRegistry)} on cluster configuration");
-
+        this.logger = logger;
         _serializerConfig = serializerConfig;
     }
 
@@ -58,17 +66,41 @@ public class CloudEventAvroSerializer : ISerializer
     /// <returns></returns>
     public Task SerializeAsync(object message, Stream output, ISerializerContext context)
     {
-        var cloudEvent = (CloudEvent)message;
-        var cloudEventData = cloudEvent.Data!;
 
         return ConfluentSerializerWrapper
             .GetOrCreateSerializer(
-                cloudEventData.GetType(),
+                message.GetType(),
                 () => Activator.CreateInstance(
                     typeof(AvroSerializer<>).MakeGenericType(message.GetType()),
                     _schemaRegistryClient,
                     _serializerConfig))
-            .SerializeAsync(cloudEventData, output, context);
+            .SerializeAsync(message, output, context);
 
+    }
+}
+
+
+internal class MyAvroTypeNameResolver : ISchemaRegistryTypeNameResolver
+{
+    private readonly ISchemaRegistryClient _client;
+
+    public MyAvroTypeNameResolver(ISchemaRegistryClient client)
+    {
+        _client = client;
+    }
+
+    public async Task<string> ResolveAsync(int id)
+    {
+        var schema = await _client.GetSchemaAsync(id);
+
+        var avroFields = JsonConvert.DeserializeObject<AvroSchemaFields>(schema.SchemaString);
+        return $"{avroFields.Namespace}.{avroFields.Name}";
+    }
+
+    private class AvroSchemaFields
+    {
+        public string Name { get; set; }
+
+        public string Namespace { get; set; }
     }
 }

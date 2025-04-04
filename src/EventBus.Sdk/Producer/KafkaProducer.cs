@@ -15,6 +15,9 @@ public interface IEventProducer
     Task<DeliveryReport> ProduceAsync(CloudEvent message);
 }
 
+/// <summary>
+/// native kafka producer
+/// </summary>
 public class KafkaProducer : IEventProducer, IDisposable
 {
     private readonly ILogger<KafkaProducer> _logger;
