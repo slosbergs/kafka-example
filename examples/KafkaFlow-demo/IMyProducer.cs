@@ -1,6 +1,7 @@
-﻿using CloudNative.CloudEvents;
+﻿using Avro.Specific;
+using CloudNative.CloudEvents;
 
 internal interface IMyProducer
 {
-    Task<string> ProduceAsync(string topic, CloudEvent cloudEvent);
+    Task<string> ProduceAsync<T>(string topic, CloudEvent cloudEvent);
 }

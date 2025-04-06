@@ -1,44 +1,60 @@
 ﻿using Confluent.Kafka;
+using System.Collections;
 
 namespace EventBus.Sdk.Configuration;
-public class EventBusConfig
+
+public class EventBusConfig : IEnumerable<KeyValuePair<string, string>>, IEnumerable
 {
-    public SecurityConfig Security { get; set; }
-    public EvbProducerConfig KafkaProducer { get; set; }
-    public EvbConsumerConfig KafkaConsumer { get; set; }
-    public string BootstrapServers { get; set; }
+    private Dictionary<string, string> _configDictionary;
+
+    public EventBusConfig()
+    {
+        _configDictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    }
+
+    public EventBusConfig(IDictionary<string, string> config) : this()
+    {
+        foreach (var kvp in config)
+        {
+            _configDictionary[kvp.Key] = kvp.Value;
+        }
+    }
+
+    public void Add(string key, string value)
+    {
+        _configDictionary[key] = value;
+    }
+
+    public string this[string key]
+    {
+        get => _configDictionary.TryGetValue(key, out var value) ? value : null;
+        set => _configDictionary[key] = value;
+    }
+
+    public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+    {
+        return _configDictionary.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    public ProducerConfig ProducerConfig => (ProducerConfig)this;
+    public ConsumerConfig ConsumerConfig => (ConsumerConfig)this;
+
+    // Explicit cast to ProducerConfig
+    public static explicit operator ProducerConfig(EventBusConfig config)
+    {
+        var producerConfig = new ProducerConfig(config._configDictionary);
+        return producerConfig;
+    }
+
+    // Explicit cast to ConsumerConfig
+    public static explicit operator ConsumerConfig(EventBusConfig config)
+    {
+        var consumerConfig = new ConsumerConfig(config._configDictionary);
+        return consumerConfig;
+    }
 }
-
-public class EvbConsumerConfig : ConsumerConfig
-{
-    public string? Topics { get; set; }
-
-    public new AutoOffsetReset AutoOffsetReset { get; set; } = AutoOffsetReset.Earliest;
-    public new int? QueuedMinMessages { get; set; } = 10;
-
-    public new int? SessionTimeoutMs = (int)TimeSpan.FromMinutes(3).TotalMilliseconds;
-
-    public new bool EnableAutoCommit { get; } = false;
-}
-
-public class SecurityConfig
-{
-    public string SslCertificate { get; set; }
-    public string SslKey { get; set; }
-    public bool EnableAuthentication { get; set; }
-    public SaslMechanism? SaslMechanism { get; set; }
-    public SecurityProtocol? SecurityProtocol { get; set; }
-}
-
-public class EvbProducerConfig : ProducerConfig
-{
-    public string Topic { get; set; }
-    public new Acks Acks { get; set; } = Acks.All;
-    public new bool EnableIdempotence { get; set; } = true;
-    public new double LingerMs { get; set; } = 0;
-    public new int? MessageSendMaxRetries { get; set; } = 5;
-
-    public new string DeliveryReportFields { get; set; } = "status";
-}
-
-

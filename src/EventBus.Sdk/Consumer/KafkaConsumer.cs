@@ -6,27 +6,25 @@ using EventBus.Sdk.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace EventBus.Sdk.Consumer;
 public class KafkaConsumer : BackgroundService
 {
-    private readonly ConsumerConfig _config;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<KafkaConsumer> _logger;
+    private readonly ConsumerConfig _config;
     private IConsumer<string, byte[]> _consumer;
     private readonly JsonEventFormatter formatter = new JsonEventFormatter(new JsonSerializerOptions() { },
     new JsonDocumentOptions() { });
 
-    public KafkaConsumer(ILogger<KafkaConsumer> logger, EventBusConfig eventBusConfig, IServiceProvider serviceProvider)
+    public KafkaConsumer(ILogger<KafkaConsumer> logger, IOptions<EventBusConfig> evbConfigOptions, IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
-        _config = eventBusConfig.KafkaConsumer;
-        _config.GroupId ??= "consumer__" + Guid.NewGuid().ToString();
-        _config.GroupInstanceId ??= Guid.NewGuid().ToString();
-        _config.BootstrapServers = eventBusConfig.BootstrapServers;
+        _config = evbConfigOptions.Value.ConsumerConfig;
 
         // FIXME add OAuth authentication
 
@@ -35,7 +33,7 @@ public class KafkaConsumer : BackgroundService
             .SetErrorHandler(OnError)
             .Build();
 
-        var topics = eventBusConfig.KafkaConsumer.Topics!.Split([',', ' ', ';'], StringSplitOptions.RemoveEmptyEntries)
+        var topics = _config.Get("topics").Split([',', ' ', ';'], StringSplitOptions.RemoveEmptyEntries)
             .Select(t => "^" + Regex.Escape(t).Replace("\\*", ".*") + "$");
         _consumer.Subscribe(topics);
     }

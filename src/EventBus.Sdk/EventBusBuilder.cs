@@ -25,7 +25,7 @@ public class EventBusBuilder : IEventBusBuilder
 
     public IEventBusBuilder WithKafkaProducer()
     {
-        if (_config.KafkaProducer == null)
+        if (_config.ProducerConfig == null)
             throw new InvalidOperationException("KafkaProducer not configured");
 
         return this;
@@ -33,7 +33,7 @@ public class EventBusBuilder : IEventBusBuilder
 
     public IEventBusBuilder WithKafkaConsumer<THandler>() where THandler : class, ICloudEventHandler
     {
-        if (_config.KafkaConsumer == null)
+        if (_config.ConsumerConfig == null)
             throw new InvalidOperationException("KafkaConsumer not configured");
 
         _eventHandlerType = typeof(THandler);

@@ -10,7 +10,7 @@ internal class MyCloudEventProducer
 {
     private readonly IMessageProducer<CloudEvent> _kfProducer;
     private readonly AvroSerializerConfig _serializerConfig = new()
-    { AutoRegisterSchemas = true, SubjectNameStrategy = SubjectNameStrategy.TopicRecord };
+    { AutoRegisterSchemas = true };
     private readonly ISchemaRegistryClient _schemaRegistry;
     private readonly SchemaRegistryConfig _schemaRegistryConfig;
 
@@ -35,7 +35,7 @@ internal class MyCloudEventProducer
                                 MessageComponentType.Value,
                                 topic));
 
-        var schemaId = (await _schemaRegistry.GetLatestSchemaAsync(SubjectNameStrategy.Topic.ConstructValueSubjectName(topic))).Id;
+        var schemaId = (await _schemaRegistry.GetLatestSchemaAsync($"{topic}-value")).Id;
         cloudEvent.DataSchema = new Uri($"{_schemaRegistryConfig.Url}/schemas/ids/{schemaId}/schema/");
 
         Message<string?, byte[]> message = cloudEvent.ToKafkaMessage(ContentMode.Binary, new JsonEventFormatter());

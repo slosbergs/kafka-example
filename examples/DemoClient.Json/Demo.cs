@@ -21,7 +21,7 @@ public class Demo(ILogger<Demo> logger, IEventProducer eventProducer)
             Source = new Uri("test", UriKind.Relative)
         };
 
-        var deliveryReport = await eventProducer.ProduceAsync(msg);
+        var deliveryReport = await eventProducer.ProduceAsync<T>("foo", msg);
         logger.LogInformation("Produced event: id {0}, topic {1}, partition {2}, offset {3}",
             msg.Id, deliveryReport.Topic, deliveryReport.Partition, deliveryReport.Offset);
     }

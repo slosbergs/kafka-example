@@ -1,5 +1,8 @@
 ﻿using CloudNative.CloudEvents;
 using Confluent.Kafka;
+using Confluent.SchemaRegistry;
+using EventBus.Sdk.Configuration;
+using EventBus.Sdk.Producer;
 using KafkaFlow;
 using KafkaFlow_demo.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,31 +12,64 @@ await Host
     .CreateDefaultBuilder(args)
     .ConfigureServices((hostContext, services) =>
     {
-        Confluent.Kafka.ProducerConfig producerConfig = new Confluent.Kafka.ProducerConfig()
-        {
-            MessageMaxBytes = 200000000,
-            //req = 200000000,
-            Acks = Confluent.Kafka.Acks.All
-        };
+
         var bootstrapHost = "192.168.101.3:9092";
         var schemaRegistryHost = "192.168.101.3:9092";
 
+
+        Confluent.Kafka.ProducerConfig producerConfig = new Confluent.Kafka.ProducerConfig()
+        {
+            EnableDeliveryReports = true,
+            Acks = Confluent.Kafka.Acks.All,
+            EnableSslCertificateVerification = false,
+            SecurityProtocol = SecurityProtocol.Plaintext,
+
+        };
+
+        services.Configure<EventBusConfig>(options =>
+        {
+            options.Add("bootstrap.servers", bootstrapHost);
+            options.Add("enable.idempotence", "true");
+
+            options["security.protocol"] = "PLAINTEXT";  // This is the key setting to disable SSL
+            options["group.id"] = "my-consumer-group";
+            options["enable.ssl.certificate.verification"] = "false";
+            options["compression.type"] = "gzip";
+            options["debug"] = "msg";
+
+
+        });
+
+
         services.AddSingleton<MyCloudEventProducer>();
 
-        services.AddTransient<IMyProducer, MyProducer>();
+        //services.AddTransient<IMyProducer, MyProducer>();
+        services.AddTransient<IEventProducer, KafkaProducer>();
+        services.AddTransient<ISchemaRegistryClient, CachedSchemaRegistryClient>(sp =>
+            new CachedSchemaRegistryClient([new("schema.registry.url", schemaRegistryHost)]));
+
         services.AddHostedService<TestWorker>();
 
         services.AddKafkaFlowHostedService(kafka => kafka
             .AddCluster(cluster => cluster
                 .WithBrokers(new[] { bootstrapHost })
-                .WithSchemaRegistry(config => config.Url = schemaRegistryHost)
+                //.WithSchemaRegistry(config => config.Url = schemaRegistryHost)
+                .WithSecurityInformation(security =>
+                {
+                    security.SecurityProtocol = KafkaFlow.Configuration.SecurityProtocol.Plaintext;
+                    security.SaslMechanism = KafkaFlow.Configuration.SaslMechanism.Plain;
+                    security.EnableSslCertificateVerification = false;
+                })
                 .AddProducer<CloudEvent>(
                         producer =>
                             producer.WithProducerConfig(producerConfig)
 
                         .AddMiddlewares(m => m
-                            .AddSchemaRegistryAvroSerializer()
                             .Add<ProducerMiddleware>()
+
+                            //.AddSchemaRegistryAvroSerializer()
+                            //.Add<ProducerMiddleware>()
+
                             )
                         //    m.AddSingleTypeSerializer<CloudEventSerializer>(typeof(CloudEvent))
                         //)
