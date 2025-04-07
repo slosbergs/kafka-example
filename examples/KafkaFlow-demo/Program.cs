@@ -34,7 +34,7 @@ await Host
             options["security.protocol"] = "PLAINTEXT";  // This is the key setting to disable SSL
             options["group.id"] = "my-consumer-group";
             options["enable.ssl.certificate.verification"] = "false";
-            options["compression.type"] = "gzip";
+            options["compression.type"] = "lz4";
             options["debug"] = "msg";
 
 

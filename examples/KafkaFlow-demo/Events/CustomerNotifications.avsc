@@ -1,0 +1,167 @@
+﻿[
+  {
+    "fields": [
+      {
+        "name": "customerId",
+        "type": "string"
+      },
+      {
+        "name": "profileType",
+        "type": {
+          "name": "ProfileType",
+          "symbols": [
+            "Retail",
+            "Commercial"
+          ],
+          "type": "enum"
+        }
+      },
+      {
+        "name": "profile",
+        "type": [
+          "null",
+          {
+            "fields": [
+              {
+                "name": "firstName",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "middleName",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "lastName",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "nameSuffix",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "address",
+                "type": [
+                  "null",
+                  {
+                    "fields": [
+                      {
+                        "name": "streetLine1",
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      {
+                        "name": "streetLine2",
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      {
+                        "name": "streetLine3",
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      {
+                        "name": "city",
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      {
+                        "name": "zip",
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      {
+                        "name": "state",
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      {
+                        "name": "zipPlusFour",
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      }
+                    ],
+                    "name": "AddressModel",
+                    "type": "record"
+                  }
+                ]
+              }
+            ],
+            "name": "RetailCustomerProfileDelta",
+            "type": "record"
+          },
+          {
+            "fields": [
+              {
+                "name": "customerName",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "customerNameAdditional",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "address",
+                "type": [
+                  "null",
+                  "AddressModel"
+                ]
+              }
+            ],
+            "name": "CommercialCustomerProfileDelta",
+            "type": "record"
+          }
+        ]
+      }
+    ],
+    "name": "CustomerProfileUpdatedEvent",
+    "type": "record"
+  },
+  {
+    "fields": [
+      {
+        "name": "customerId",
+        "type": "string"
+      },
+      {
+        "name": "profileType",
+        "type": [
+          "ProfileType"
+        ]
+      }
+    ],
+    "name": "CustomerProfileCreatedEvent",
+    "type": "record"
+  }
+]
